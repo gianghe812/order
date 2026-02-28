@@ -1,0 +1,251 @@
+local _P = game:GetService("Players")
+local _R = game:GetService("RunService")
+local _T = game:GetService("TeleportService") 
+local _H = game:GetService("HttpService")
+local _U = game:GetService("UserInputService")
+local _S = game:GetService("TweenService")
+local _W = workspace
+
+local L_P = _P.LocalPlayer
+local P_G = L_P:WaitForChild("PlayerGui")
+
+-- [BẢO MẬT CAO] Anti-AFK & Anti-Detection
+local VirtualUser = game:GetService("VirtualUser")
+L_P.Idled:Connect(function()
+    VirtualUser:CaptureController()
+    -- Giả lập click ngẫu nhiên để tránh bị quét hành vi bot
+    VirtualUser:Button2Down(Vector2.new(math.random(100,500), math.random(100,500)), _W.CurrentCamera.CFrame)
+    task.wait(0.1)
+    VirtualUser:Button2Up(Vector2.new(math.random(100,500), math.random(100,500)), _W.CurrentCamera.CFrame)
+end)
+
+-- [BẢO MẬT] Chặn các lỗi lòi script ra console
+if not shared.AntiError then
+    shared.AntiError = true
+    _R.Stepped:Connect(function()
+        setfpscap(999) -- Mở khóa FPS ngầm cho mượt
+    end)
+end
+
+-- Create GUI (Tên ngẫu nhiên để ẩn danh)
+local sGui = Instance.new("ScreenGui")
+sGui.Name = _H:GenerateGUID(false) -- Tên GUI là ID ngẫu nhiên
+sGui.ResetOnSpawn = false
+sGui.Parent = P_G
+
+local mainContainer = Instance.new("Frame", sGui)
+mainContainer.Size = UDim2.new(1, 0, 1, 0)
+mainContainer.BackgroundTransparency = 1
+mainContainer.Visible = true
+
+-- TOGGLE BUTTON
+local toggleBtn = Instance.new("TextButton", sGui)
+toggleBtn.Size = UDim2.new(0, 120, 0, 30)
+toggleBtn.Position = UDim2.new(0.5, -60, 0, 5) 
+toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+toggleBtn.BackgroundTransparency = 0.4
+toggleBtn.Font = Enum.Font.FredokaOne
+toggleBtn.Text = "HIDE / SHOW (L)"
+toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 0)
+toggleBtn.TextSize = 14
+Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
+
+-- A. SERVER PANEL (RIGHT)
+local serverFrame = Instance.new("Frame", mainContainer)
+serverFrame.Size = UDim2.new(0, 220, 0, 140) 
+serverFrame.Position = UDim2.new(1, -20, 0, 45) 
+serverFrame.AnchorPoint = Vector2.new(1, 0)
+serverFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+serverFrame.BackgroundTransparency = 0.5
+Instance.new("UICorner", serverFrame).CornerRadius = UDim.new(0, 12)
+
+local layout = Instance.new("UIListLayout", serverFrame)
+layout.Padding = UDim.new(0, 5)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+local function createBtn(name, text, color)
+    local btn = Instance.new("TextButton", serverFrame)
+    btn.Name = name
+    btn.Size = UDim2.new(1, -20, 0, 26) 
+    btn.BackgroundColor3 = color
+    btn.BackgroundTransparency = 0.2
+    btn.Font = Enum.Font.FredokaOne
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 12
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+    return btn
+end
+
+local hopBtn = createBtn("HopBtn", "🚀 Hop Server", Color3.fromRGB(255, 170, 0))
+local rejoinBtn = createBtn("RejoinBtn", "🔄 Rejoin Server", Color3.fromRGB(170, 85, 255))
+local copyBtn = createBtn("CopyBtn", "📋 Copy JobID", Color3.fromRGB(0, 170, 255))
+
+local joinInput = Instance.new("TextBox", serverFrame)
+joinInput.Size = UDim2.new(1, -20, 0, 26)
+joinInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+joinInput.BackgroundTransparency = 0.8
+joinInput.Font = Enum.Font.FredokaOne
+joinInput.PlaceholderText = "Paste ID & Join..."
+joinInput.Text = ""
+joinInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+joinInput.TextSize = 11
+Instance.new("UICorner", joinInput).CornerRadius = UDim.new(0, 6)
+
+-- B. MIDDLE PANEL (SỬA LỖI TRÀN CHỮ V37)
+local topFrame = Instance.new("Frame", mainContainer)
+topFrame.Size = UDim2.new(0, 320, 0, 100) 
+topFrame.Position = UDim2.new(0.5, 0, 0, 40)
+topFrame.AnchorPoint = Vector2.new(0.5, 0)
+topFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+topFrame.BackgroundTransparency = 0.5
+topFrame.ClipsDescendants = true
+Instance.new("UICorner", topFrame).CornerRadius = UDim.new(0, 12)
+
+local donHeader = Instance.new("TextLabel", topFrame)
+donHeader.Size = UDim2.new(0, 75, 0, 45) 
+donHeader.Position = UDim2.new(0, 15, 0, 10)
+donHeader.BackgroundTransparency = 1
+donHeader.Font = Enum.Font.FredokaOne
+donHeader.Text = "Order:"
+donHeader.TextColor3 = Color3.fromRGB(255, 255, 255)
+donHeader.TextSize = 31
+donHeader.TextXAlignment = Enum.TextXAlignment.Left
+
+local contentLabel = Instance.new("TextLabel", topFrame)
+contentLabel.Size = UDim2.new(1, -110, 0, 45) 
+contentLabel.Position = UDim2.new(0, 100, 0, 10) 
+contentLabel.BackgroundTransparency = 1
+contentLabel.Font = Enum.Font.FredokaOne
+contentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+contentLabel.TextScaled = true 
+contentLabel.TextWrapped = true 
+contentLabel.RichText = true 
+contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+contentLabel.Text = "..." 
+Instance.new("UITextSizeConstraint", contentLabel).MaxTextSize = 31
+
+local nameLabel = Instance.new("TextLabel", topFrame)
+nameLabel.Size = UDim2.new(1, -30, 0, 40)
+nameLabel.Position = UDim2.new(0, 15, 0, 50)
+nameLabel.BackgroundTransparency = 1
+nameLabel.Font = Enum.Font.FredokaOne
+nameLabel.Text = "Name: " .. L_P.Name
+nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+nameLabel.TextSize = 31
+nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- C. INPUT CONTAINER
+local inputContainer = Instance.new("Frame", mainContainer)
+inputContainer.Size = UDim2.new(0, 320, 0, 35)
+inputContainer.Position = UDim2.new(0.5, 0, 0, 145)
+inputContainer.AnchorPoint = Vector2.new(0.5, 0)
+inputContainer.BackgroundTransparency = 1
+
+local textBox = Instance.new("TextBox", inputContainer)
+textBox.Size = UDim2.new(0, 210, 1, 0)
+textBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+textBox.BackgroundTransparency = 0.2
+textBox.Font = Enum.Font.FredokaOne
+textBox.PlaceholderText = "> TYPE ORDER HERE..." 
+textBox.Text = ""
+textBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+textBox.TextScaled = true
+Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 8)
+
+local finishBtn = Instance.new("TextButton", inputContainer)
+finishBtn.Size = UDim2.new(0, 100, 1, 0)
+finishBtn.Position = UDim2.new(1, 0, 0, 0)
+finishBtn.AnchorPoint = Vector2.new(1, 0)
+finishBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 127)
+finishBtn.Font = Enum.Font.FredokaOne
+finishBtn.Text = "Finished"
+finishBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+finishBtn.TextSize = 14
+Instance.new("UICorner", finishBtn).CornerRadius = UDim.new(0, 8)
+
+-- D. STATS PANEL (LEFT)
+local mainFrame = Instance.new("Frame", mainContainer)
+mainFrame.Size = UDim2.new(0, 200, 0, 140) 
+mainFrame.Position = UDim2.new(0, 20, 0, 45) 
+mainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.BackgroundTransparency = 0.5
+Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 10)
+
+local statsLabel = Instance.new("TextLabel", mainFrame)
+statsLabel.Size = UDim2.new(1, -20, 1, -20)
+statsLabel.Position = UDim2.new(0, 10, 0, 10)
+statsLabel.BackgroundTransparency = 1
+statsLabel.Font = Enum.Font.FredokaOne
+statsLabel.TextSize = 17 
+statsLabel.TextXAlignment = Enum.TextXAlignment.Left
+statsLabel.RichText = true
+
+local brandLabel = Instance.new("TextLabel", mainFrame)
+brandLabel.Size = UDim2.new(1, -20, 0, 25)
+brandLabel.Position = UDim2.new(0, 10, 1, -30)
+brandLabel.BackgroundTransparency = 1
+brandLabel.Font = Enum.Font.FredokaOne
+brandLabel.TextSize = 14
+brandLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
+brandLabel.Text = "Script by Trgianghe"
+
+-- Logic Hop SV (Countdown)
+local hopping = false
+hopBtn.MouseButton1Click:Connect(function()
+    if hopping then return end
+    hopping = true
+    hopBtn.Text = "Searching..."
+    task.spawn(function()
+        local success, r = pcall(function() return _H:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100")) end)
+        if success and r and r.data then
+            for _,v in pairs(r.data) do
+                if v.playing < v.maxPlayers and v.id ~= game.JobId then
+                    _T:TeleportToPlaceInstance(game.PlaceId, v.id, L_P)
+                    break
+                end
+            end
+        end
+        for i = 3, 1, -1 do hopBtn.Text = "Fail! Retry in "..i.."s" task.wait(1) end
+        hopBtn.Text = "🚀 Hop Server"
+        hopping = false
+    end)
+end)
+
+-- Logic Input & Toggle
+textBox.FocusLost:Connect(function(enter) if enter then contentLabel.Text = textBox.Text ~= "" and textBox.Text or "..." textBox.Text = "" end end)
+finishBtn.MouseButton1Click:Connect(function() contentLabel.Text = '<font color="rgb(0, 255, 127)">Finished ✅</font>' textBox.Text = "" end)
+toggleBtn.MouseButton1Click:Connect(function() mainContainer.Visible = not mainContainer.Visible end)
+_U.InputBegan:Connect(function(i, g) if not g and i.KeyCode == Enum.KeyCode.L then mainContainer.Visible = not mainContainer.Visible end end)
+rejoinBtn.MouseButton1Click:Connect(function() _T:TeleportToPlaceInstance(game.PlaceId, game.JobId, L_P) end)
+copyBtn.MouseButton1Click:Connect(function() setclipboard(game.JobId) end)
+joinInput.FocusLost:Connect(function(e) if e and joinInput.Text ~= "" then _T:TeleportToPlaceInstance(game.PlaceId, joinInput.Text, L_P) joinInput.Text = "" end end)
+
+-- Fade Brand
+local brandNames = {"Script by Trgianghe", "Ngô Huy Trường Giang"}
+local currentIdx = 1
+task.spawn(function()
+    while true do
+        task.wait(3)
+        _S:Create(brandLabel, TweenInfo.new(0.6), {TextTransparency = 1}):Play()
+        task.wait(0.6)
+        currentIdx = currentIdx == 1 and 2 or 1
+        brandLabel.Text = brandNames[currentIdx]
+        _S:Create(brandLabel, TweenInfo.new(0.6), {TextTransparency = 0}):Play()
+    end
+end)
+
+-- Stats Loop
+local lastUpdate, frameCount, currentFPS = os.clock(), 0, 60
+_R.RenderStepped:Connect(function()
+    statsLabel.TextColor3 = Color3.fromHSV((tick() * 0.4) % 1, 0.7, 1)
+    frameCount = frameCount + 1
+    if os.clock() - lastUpdate >= 0.5 then
+        currentFPS = math.floor(frameCount / (os.clock() - lastUpdate))
+        frameCount, lastUpdate = 0, os.clock()
+    end
+    local sT = _W.DistributedGameTime 
+    statsLabel.Text = string.format("🕒 Time: %s\n🚀 Fps:  %d\n📶 Ping: %d ms\n👥 Players: %d", 
+        string.format("%02d:%02d:%02d", sT/3600, (sT/60)%60, sT%60), 
+        currentFPS, math.floor(L_P:GetNetworkPing()*1000), #_P:GetPlayers())
+end)
