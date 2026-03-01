@@ -52,7 +52,7 @@ Instance.new("UICorner", toggleBtn).CornerRadius = UDim.new(0, 8)
 
 -- A. SERVER PANEL (RIGHT)
 local serverFrame = Instance.new("Frame", mainContainer)
-serverFrame.Size = UDim2.new(0, 220, 0, 150) 
+serverFrame.Size = UDim2.new(0, 220, 0, 140) 
 serverFrame.Position = UDim2.new(1, -20, 0, 45) 
 serverFrame.AnchorPoint = Vector2.new(1, 0)
 serverFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
