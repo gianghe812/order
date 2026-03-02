@@ -148,7 +148,7 @@ donHeader.TextXAlignment = Enum.TextXAlignment.Left
 -- NỘI DUNG GẦN DẤU : HƠN (Position X: 105 -> 85)
 local contentLabel = Instance.new("TextLabel", topFrame)
 contentLabel.Size = UDim2.new(1, -95, 0, 45) -- Mở rộng chiều rộng để bù lại
-contentLabel.Position = UDim2.new(0, 80, 0, 10) 
+contentLabel.Position = UDim2.new(0, 95, 0, 10) 
 contentLabel.BackgroundTransparency = 1
 contentLabel.Font = Enum.Font.FredokaOne
 contentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
